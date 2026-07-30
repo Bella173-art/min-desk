@@ -1,0 +1,16 @@
+{
+  "name": "敏M的工作台",
+  "short_name": "工作台",
+  "description": "敏的个人生活工作台 · 待办/财务/健身/语言/外贸/Oscar",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5FAFF",
+  "theme_color": "#EAF4FD",
+  "lang": "zh-CN",
+  "icons": [
+    { "src": "oscar-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "assets/oscar.jpg", "sizes": "512x512", "type": "image/jpeg", "purpose": "any maskable" }
+  ]
+}
