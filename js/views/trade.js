@@ -12,8 +12,9 @@ App.Views.trade = (function(){
     {ico:'🏦', name:'中国银行外汇牌价', url:'https://www.boc.cn/sourcedb/whpj/', desc:'人民币外汇牌价查询'}
   ];
   var NEWS_LINKS = [
-    {ico:'🏭', name:'化工网 ChemMade', url:'https://www.chemmade.com', desc:'化工产品与行业资讯'},
-    {ico:'🌐', name:'中国化工网', url:'https://www.chemnet.com.cn', desc:'化工行业综合门户'},
+    {ico:'🧪', name:'ChemicalBook', url:'https://www.chemicalbook.com', desc:'化工产品数据库 · MSDS/COA/CAS 查询'},
+    {ico:'🔢', name:'中国海关 HS 编码查询', url:'http://www.customs.gov.cn/customs/302427/302442/index.html', desc:'官方 HS Code 申报编码权威查询'},
+    {ico:'🔎', name:'HS Code 查询网', url:'https://www.hscode.com', desc:'HS 编码速查 · 商品分类工具'},
     {ico:'📊', name:'商务部', url:'https://www.mofcom.gov.cn', desc:'外贸政策与权威资讯'}
   ];
   var PAIRS = ['USD/CNY','EUR/CNY','JPY/CNY','GBP/CNY','KRW/CNY'];
@@ -44,8 +45,8 @@ App.Views.trade = (function(){
     h+='<button class="btn btn-outline btn-block btn-sm mt8" data-act="fx">➕ 记录参考汇率</button>';
     h+='</div>';
 
-    // 行业资讯
-    h+='<div class="card"><div class="card-title"><span class="ico">📰</span>化工外贸行业资讯</div>'+linkCards(NEWS_LINKS)+'</div>';
+    // 化工工具/平台
+    h+='<div class="card"><div class="card-title"><span class="ico">🧪</span>化工产品库 / HS Code 工具</div>'+linkCards(NEWS_LINKS)+'</div>';
 
     // 客户档案
     var cs=App.Storage.getList('trade_customers');
