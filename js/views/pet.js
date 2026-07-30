@@ -17,6 +17,11 @@ App.Views.pet = (function(){
       {key:'type', label:'类型', type:'select', opts:['内驱虫','外驱虫','内外驱虫']},
       {key:'note', label:'药品 / 备注', type:'text', placeholder:'品牌或剂量'}
     ]},
+    oscar_vaccine: {popTitle:'新增疫苗记录', fields:[
+      {key:'date', label:'接种日期', type:'date', def:today()},
+      {key:'name', label:'疫苗名称', type:'text', placeholder:'如 卫佳捌 / 狂犬疫苗'},
+      {key:'note', label:'备注', type:'text', placeholder:'批号 / 下次接种时间'}
+    ]},
     oscar_weight: {popTitle:'记录体重', fields:[
       {key:'date', label:'日期', type:'date', def:today()},
       {key:'weight', label:'体重 (kg)', type:'number', placeholder:'12.5'}
@@ -74,8 +79,12 @@ App.Views.pet = (function(){
         '<div class="li-sub">'+App.Util.escape(r.weight||'')+' kg</div></div>'+
         '<button class="btn btn-sm btn-ghost" data-del="oscar_weight:'+r.id+'" style="padding:5px 9px">删除</button></div>';
     });
-    // 体重趋势图
-    h+='<div class="card"><div class="card-title"><span class="ico">📉</span>体重趋势</div><canvas class="chart-box" id="petWeightChart" style="height:170px"></canvas></div>';
+    // 体重趋势图 → 已替换为疫苗记录
+    h+=recCard('💉','疫苗记录','oscar_vaccine','➕ 新增疫苗记录',function(r){
+      return '<div class="list-item"><div class="li-main"><div class="li-title">'+r.date+(r.name?' <span class="chip chip-green">'+App.Util.escape(r.name)+'</span>':'')+'</div>'+
+        (r.note?'<div class="li-sub">'+App.Util.escape(r.note)+'</div>':'')+'</div>'+
+        '<button class="btn btn-sm btn-ghost" data-del="oscar_vaccine:'+r.id+'" style="padding:5px 9px">删除</button></div>';
+    });
 
     h+=recCard('🦴','换狗粮','oscar_food','➕ 换粮记录',function(r){
       return '<div class="list-item"><div class="li-main"><div class="li-title">'+r.date+(r.brand?' · '+App.Util.escape(r.brand):'')+'</div>'+
@@ -94,27 +103,38 @@ App.Views.pet = (function(){
     } else h+='<div class="muted sm center">添加 Oscar 爱吃的小零食吧</div>';
     h+='</div>';
 
-    // 自定义备注（内联）
+    // 自定义备注（标题+事件 弹窗录入）
     var memo=App.Storage.getList('oscar_memo');
-    h+='<div class="card"><div class="card-title"><span class="ico">📝</span>自定义备注</div>';
-    h+='<div class="field" style="display:flex;gap:8px;margin-bottom:8px"><input class="input" id="memoInput" placeholder="随手记点什么…"><button class="btn btn-primary btn-sm" id="memoAdd">添加</button></div>';
-    if(memo.length){
-      h+=memo.slice().sort(function(a,b){return b.ts-a.ts;}).map(function(m){
-        return '<div class="list-item"><div class="li-main"><div class="li-title sm">'+App.Util.escape(m.text)+'</div><div class="li-sub">'+App.Util.fromNow(m.ts)+'</div></div>'+
-          '<button class="btn btn-sm btn-ghost" data-del="oscar_memo:'+m.id+'" style="padding:5px 9px">删除</button></div>';
-      }).join('');
-    }
+    h+='<div class="card"><div class="card-title"><span class="ico">📝</span>自定义备注<span class="more">'+memo.length+'条</span></div>';
+    if(!memo.length) h+='<div class="empty"><span class="ico">📝</span>暂无备注</div>';
+    else h+=memo.slice().sort(function(a,b){return b.ts-a.ts;}).map(function(m){
+      return '<div class="list-item"><div class="li-main"><div class="li-title">'+App.Util.escape(m.title||'')+'</div>'+
+        (m.text?'<div class="li-sub">'+App.Util.escape(m.text)+'</div>':'')+
+        '<div class="li-sub muted xs" style="margin-top:2px">'+App.Util.fromNow(m.ts)+'</div></div>'+
+        '<button class="btn btn-sm btn-ghost" data-del="oscar_memo:'+m.id+'" style="padding:5px 9px">删除</button></div>';
+    }).join('');
+    h+='<button class="btn btn-outline btn-block btn-sm mt8" id="memoAdd">➕ 新增备注</button>';
     h+='</div>';
 
     h+='<div style="text-align:center;padding:8px 0 20px"><div id="petFooter" style="width:70px;height:70px;margin:0 auto;opacity:.8"></div><div class="muted xs" style="margin-top:6px">Oscar 陪你一起记录生活 🐾</div></div>';
     return h;
   }
 
-  function drawWeight(){
-    var c=document.getElementById('petWeightChart'); if(!c) return;
-    var data=App.Storage.getList('oscar_weight').slice().sort(function(a,b){return a.ts-b.ts;});
-    var pts=data.filter(function(r){return r.weight;}).map(function(r){return {label:r.date.slice(5), value:+r.weight};});
-    App.Charts.line(c, {series:[{name:'体重',color:'#5BA3E8',points:pts,fill:true}], yTicks:4, valueFmt:function(v){return v.toFixed(1);}});
+  function openMemo(){
+    var html='<div class="modal-head"><h3>📝 新增备注</h3><span class="close" data-close>✕</span></div>'+
+      '<div class="field"><label>标题</label><input class="input" id="m_title" placeholder="如 洗澡 / 美容 / 体检"></div>'+
+      '<div class="field"><label>事件</label><textarea class="input" id="m_text" rows="3" placeholder="详细描述…" style="resize:vertical;font-family:inherit"></textarea></div>'+
+      '<button class="btn btn-primary btn-block mt12" id="m_save">保存</button>';
+    var box=App.modal(html);
+    box.querySelector('[data-close]').addEventListener('click',App.closeModal);
+    box.querySelector('#m_save').addEventListener('click',function(){
+      var title=box.querySelector('#m_title').value.trim();
+      var text=box.querySelector('#m_text').value.trim();
+      if(!title){App.toast('请输入标题');return;}
+      App.Storage.push('oscar_memo',{id:App.Util.uid(),title:title,text:text,ts:Date.now()});
+      App.closeModal();App.toast('已保存');refresh();
+    });
+    setTimeout(function(){ box.querySelector('#m_title').focus(); },100);
   }
 
   function openSetting(){
@@ -179,18 +199,13 @@ App.Views.pet = (function(){
       App.toast('已添加');refresh();
     });
     var memoAdd=root.querySelector('#memoAdd');
-    if(memoAdd) memoAdd.addEventListener('click',function(){
-      var inp=root.querySelector('#memoInput'); var v=(inp.value||'').trim();
-      if(!v){App.toast('请输入内容');return;}
-      App.Storage.push('oscar_memo',{id:App.Util.uid(),text:v,ts:Date.now()});
-      App.toast('已添加');refresh();
-    });
+    if(memoAdd) memoAdd.addEventListener('click',openMemo);
   }
 
   function refresh(){
     var c=document.getElementById('viewContainer'); if(!c)return;
-    c.innerHTML=render(); bind(c); setTimeout(drawWeight,0);
+    c.innerHTML=render(); bind(c);
   }
-  function mount(c){ bind(c); setTimeout(drawWeight,0); }
+  function mount(c){ bind(c); }
   return { title:title, render:render, mount:mount, refresh:refresh };
 })();
