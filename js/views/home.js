@@ -78,7 +78,7 @@ App.Views.home = (function(){
       '</div>'+
       '<div class="stat-grid">'+
         '<div class="stat-card"><div class="label">日记篇数</div><div class="value">'+diaries+'</div></div>'+
-        '<div class="stat-card"><div class="label">Oscar</div><div class="value '+(age?'':'')+'">'+(age?age.years+'岁':'未设')+'</div></div>'+
+        '<div class="stat-card"><div class="label">Oscar</div><div class="value '+(age?'':'')+'">'+(age?age.months+'个月':'未设')+'</div></div>'+
         '<div class="stat-card"><div class="label">本月支出</div><div class="value red">'+App.Util.money(expense)+'</div></div>'+
       '</div>'+
       '<div class="flex aic" style="gap:10px;margin-top:6px;padding:9px 10px;background:var(--blue-light);border-radius:12px">'+
