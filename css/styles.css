@@ -10,17 +10,17 @@
   --blue-bg:#F5FAFF;
   --blue-border:#C4DDF2;
   --blue-soft:#D9ECFB;
-  /* 中性 —— 页面底色略加深，让白卡片跳出来 */
-  --bg:#EAF1F9;
-  --bg-soft:#F1F6FC;
+  /* 中性 —— 页面底色加深让白卡片更跳 */
+  --bg:#DDE7F2;
+  --bg-soft:#E5EEF6;
   --card:#FFFFFF;
-  --text:#283647;
-  --text-sub:#7A8896;
-  --text-mute:#A4B0BD;
-  --line:#DCE6F0;
-  --line-soft:#EDF3F9;
-  /* 侧边栏渐变（浅蓝，比内容区深一档做锚定） */
-  --side-grad:linear-gradient(180deg,#D6E6F7 0%,#E4EEF9 60%,#EDF3FB 100%);
+  --text:#1F2C3D;
+  --text-sub:#5A6E84;
+  --text-mute:#8696A8;
+  --line:#C5D6E6;
+  --line-soft:#DEE7F0;
+  /* 侧边栏渐变：上方深下方浅的蓝色锚定柱，与页面内容明显分层 */
+  --side-grad:linear-gradient(180deg,#7FAACE 0%,#9BBEDB 45%,#BCD3E6 100%);
   /* 功能色 */
   --green:#43C26B;   /* 收入 / 完成 / 涨 */
   --green-bg:#E8F8EE;
@@ -208,9 +208,9 @@ ul,ol{list-style:none;}
 }
 .topbar{
   flex-shrink:0;padding:14px 18px 10px;
-  background:rgba(234,241,249,.72);
+  background:rgba(221,231,242,.78);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid rgba(196,221,242,.5);
+  border-bottom:1px solid rgba(180,202,225,.55);
   position:sticky;top:0;z-index:10;
 }
 .topbar-title{font-size:19px;font-weight:800;letter-spacing:.3px;}
@@ -340,6 +340,7 @@ ul,ol{list-style:none;}
 .rec-row:last-child{border-bottom:none;}
 
 .tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600;}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;line-height:1.6;}
 
 /* 工具类 */
 .muted{color:var(--text-sub);}
