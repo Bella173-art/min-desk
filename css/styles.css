@@ -356,3 +356,56 @@ ul,ol{list-style:none;}
   .view-container{padding:12px 12px 28px;}
   .nav-item .nav-txt{font-size:9px;}
 }
+
+/* === 外贸口语训练 === */
+.oral-today{
+  background:linear-gradient(135deg,var(--blue-light),var(--blue-bg));
+  border:1px solid var(--blue-border);
+  border-radius:var(--radius-sm);
+  padding:12px 14px;
+  margin-top:10px;
+  cursor:pointer;
+  transition:transform .15s;
+}
+.oral-today:active{transform:scale(.98);}
+.oral-lesson{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 12px;
+  background:var(--bg-soft);
+  border-radius:var(--radius-sm);
+  cursor:pointer;
+  transition:background .15s;
+}
+.oral-lesson:active{background:var(--blue-light);}
+.oral-lesson.expanded{background:var(--blue-light);}
+.oral-pct{font-size:12px;font-weight:800;}
+.oral-arrow{font-size:11px;color:var(--text-mute);}
+.oral-bar{height:4px;background:var(--line-soft);border-radius:2px;margin-top:4px;overflow:hidden;}
+.oral-bar-fill{height:100%;border-radius:2px;transition:width .3s ease;}
+.oral-sents{margin-top:10px;}
+.oral-sent{
+  padding:12px;
+  margin-bottom:10px;
+  background:#fff;
+  border:1px solid var(--line-soft);
+  border-radius:var(--radius-sm);
+}
+.oral-sent-en{font-size:15px;font-weight:700;line-height:1.5;color:var(--text);}
+.oral-sent-zh{font-size:12px;color:var(--text-sub);margin-top:3px;}
+.oral-words{margin-top:8px;}
+.oral-word{
+  display:inline-block;
+  margin:2px 4px 2px 0;
+  padding:4px 10px;
+  background:var(--blue-light);
+  border-radius:6px;
+  font-size:12px;
+  line-height:1.6;
+}
+.oral-ipa{color:var(--blue-deep);font-style:italic;}
+.oral-btns{display:flex;gap:8px;margin-top:10px;}
+.oral-btn-play,.oral-btn-rec{flex:1;}
+.oral-result{margin-top:8px;}
+.oral-btn-rec:disabled,.oral-btn-play:disabled{opacity:.6;}
