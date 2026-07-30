@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="工作台">
+  <meta name="theme-color" content="#EAF4FD">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="oscar-icon.svg">
+  <link rel="apple-touch-icon" href="assets/oscar.jpg">
+  <title>敏M的工作台</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- ============ 开屏页 ============ -->
+  <div id="splash" class="splash">
+    <div class="splash-bg">
+      <div id="splashOscar" class="splash-oscar"></div>
+    </div>
+    <div class="splash-content">
+      <div class="splash-date" id="splashDate"></div>
+      <h1 class="splash-hello">嗨，敏</h1>
+      <p class="splash-quote" id="splashQuote"></p>
+      <button class="btn btn-primary splash-btn" id="enterBtn">
+        点击进入工作台
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ 工作台 ============ -->
+  <div id="workspace" class="workspace" style="display:none">
+    <!-- 左侧固定窄侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo" id="sidebarLogo" title="Oscar"></div>
+      <nav class="sidebar-nav" id="sidebarNav">
+        <button class="nav-item active" data-view="home">
+          <span class="nav-ico">🏠</span><span class="nav-txt">首页</span>
+        </button>
+        <button class="nav-item" data-view="finance">
+          <span class="nav-ico">💰</span><span class="nav-txt">财务</span>
+        </button>
+        <button class="nav-item" data-view="fitness">
+          <span class="nav-ico">🏃</span><span class="nav-txt">运动健身</span>
+        </button>
+        <button class="nav-item" data-view="language">
+          <span class="nav-ico">📚</span><span class="nav-txt">语言学习</span>
+        </button>
+        <button class="nav-item" data-view="pet">
+          <span class="nav-ico">🐶</span><span class="nav-txt">宠物Oscar</span>
+        </button>
+        <button class="nav-item" data-view="trade">
+          <span class="nav-ico">💼</span><span class="nav-txt">外贸</span>
+        </button>
+        <button class="nav-item" data-view="ai">
+          <span class="nav-ico">🤖</span><span class="nav-txt">AI</span>
+        </button>
+        <button class="nav-item" data-view="todo">
+          <span class="nav-ico">✅</span><span class="nav-txt">待办事项</span>
+        </button>
+        <button class="nav-item" data-view="diary">
+          <span class="nav-ico">📔</span><span class="nav-txt">日记</span>
+        </button>
+        <button class="nav-item" data-view="memo">
+          <span class="nav-ico">📝</span><span class="nav-txt">备忘录</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- 右侧主内容区 -->
+    <main class="content" id="content">
+      <header class="topbar" id="topbar">
+        <h2 class="topbar-title" id="topbarTitle">首页</h2>
+      </header>
+      <div class="view-container" id="viewContainer">
+        <!-- 各视图由 JS 渲染 -->
+      </div>
+    </main>
+  </div>
+
+  <!-- 全局弹层容器 -->
+  <div id="modalRoot"></div>
+
+  <!-- ============ 脚本（按依赖顺序加载） ============ -->
+  <script src="js/storage.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/oscar.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/wordbooks.js"></script>
+  <script src="js/views/home.js"></script>
+  <script src="js/views/todo.js"></script>
+  <script src="js/views/finance.js"></script>
+  <script src="js/views/fitness.js"></script>
+  <script src="js/views/language.js"></script>
+  <script src="js/views/pet.js"></script>
+  <script src="js/views/trade.js"></script>
+  <script src="js/views/ai.js"></script>
+  <script src="js/views/diary.js"></script>
+  <script src="js/views/memo.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // 注册 Service Worker，启用离线缓存与"添加到主屏幕"
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('sw.js').catch(function(e){ console.warn('SW 注册失败', e); });
+      });
+    }
+  </script>
+</body>
+</html>
