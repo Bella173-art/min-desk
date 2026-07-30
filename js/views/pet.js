@@ -34,9 +34,11 @@ App.Views.pet = (function(){
     h+='<div id="petAvatar" style="width:110px;height:110px;margin:0 auto 10px"></div>';
     h+='<div style="font-size:24px;font-weight:800">'+App.Util.escape(petName())+'</div>';
     if(age){
-      h+='<div class="muted sm" style="margin-top:4px">出生 '+b+'　·　'+age.years+'岁 '+age.totalDays+'天</div>';
+      h+='<div class="muted sm" style="margin-top:4px">出生 '+b+'　·　'+age.months+'个月 '+age.days+'天</div>';
       if(age.daysToBirthday>0){
-        h+='<div style="margin-top:8px"><span class="chip chip-orange">🎂 距生日 '+age.daysToBirthday+' 天</span></div>';
+        var toMonths = Math.floor(age.daysToBirthday/30), toDays = age.daysToBirthday%30;
+        var toTxt = toMonths>0 ? (toMonths+'个月'+toDays+'天') : (age.daysToBirthday+'天');
+        h+='<div style="margin-top:8px"><span class="chip chip-orange">🎂 距生日 '+toTxt+'</span></div>';
       } else if(age.daysToBirthday===0){
         h+='<div style="margin-top:8px"><span class="chip chip-orange">🎂 今天是生日！</span></div>';
       }
