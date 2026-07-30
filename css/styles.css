@@ -10,14 +10,17 @@
   --blue-bg:#F5FAFF;
   --blue-border:#C4DDF2;
   --blue-soft:#D9ECFB;
-  /* 中性 */
-  --bg:#F4F9FF;
+  /* 中性 —— 页面底色略加深，让白卡片跳出来 */
+  --bg:#EAF1F9;
+  --bg-soft:#F1F6FC;
   --card:#FFFFFF;
-  --text:#2B3A4A;
-  --text-sub:#7C8A99;
-  --text-mute:#A6B2BF;
-  --line:#E8EFF5;
-  --line-soft:#F0F5FA;
+  --text:#283647;
+  --text-sub:#7A8896;
+  --text-mute:#A4B0BD;
+  --line:#DCE6F0;
+  --line-soft:#EDF3F9;
+  /* 侧边栏渐变（浅蓝，比内容区深一档做锚定） */
+  --side-grad:linear-gradient(180deg,#D6E6F7 0%,#E4EEF9 60%,#EDF3FB 100%);
   /* 功能色 */
   --green:#43C26B;   /* 收入 / 完成 / 涨 */
   --green-bg:#E8F8EE;
@@ -32,9 +35,9 @@
   --radius:18px;
   --radius-sm:12px;
   --radius-xs:8px;
-  --shadow:0 2px 14px rgba(91,163,232,.10);
-  --shadow-sm:0 1px 6px rgba(91,163,232,.08);
-  --shadow-lg:0 6px 30px rgba(91,163,232,.16);
+  --shadow:0 4px 18px rgba(91,163,232,.14);
+  --shadow-sm:0 2px 8px rgba(91,163,232,.10);
+  --shadow-lg:0 8px 32px rgba(91,163,232,.18);
   --maxw:680px;
 }
 
@@ -79,6 +82,13 @@ ul,ol{list-style:none;}
   background:var(--card);border-radius:var(--radius);
   box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px;
   border:1px solid var(--line-soft);
+  position:relative;
+}
+/* 顶部细微高光，让卡片有"浮起"感 */
+.card::before{
+  content:"";position:absolute;left:14px;right:14px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent);
+  border-radius:2px;
 }
 .card-title{
   display:flex;align-items:center;gap:8px;
@@ -151,36 +161,44 @@ ul,ol{list-style:none;}
    ============================================================ */
 .workspace{display:flex;height:100vh;height:100dvh;}
 
-/* 侧边栏 */
+/* 侧边栏 —— 浅蓝渐变，比内容区深一档做视觉锚定 */
 .sidebar{
   width:var(--sidebar);flex-shrink:0;
-  background:#fff;border-right:1px solid var(--line);
+  background:var(--side-grad);
+  border-right:1px solid var(--blue-border);
   display:flex;flex-direction:column;align-items:center;
   padding:12px 0 14px;position:fixed;left:0;top:0;bottom:0;z-index:20;
   overflow-y:auto;
 }
 .sidebar::-webkit-scrollbar{width:0;}
 .sidebar-logo{
-  width:40px;height:40px;margin-bottom:10px;border-radius:50%;
+  width:40px;height:40px;margin-bottom:12px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
   background:var(--blue-light);cursor:pointer;overflow:hidden;
-  box-shadow:0 1px 4px rgba(91,163,232,.18);
+  box-shadow:0 2px 6px rgba(91,163,232,.25);
+  border:2px solid #fff;
 }
 .sidebar-logo img{width:100%;height:100%;object-fit:cover;display:block;}
 .sidebar-nav{
-  display:flex;flex-direction:column;gap:4px;width:100%;align-items:center;flex:1;
+  display:flex;flex-direction:column;gap:3px;width:100%;align-items:center;flex:1;
 }
 .nav-item{
   width:100%;display:flex;flex-direction:column;align-items:center;gap:3px;
-  padding:8px 2px;border-radius:var(--radius-sm);color:var(--text-sub);
-  transition:.12s;position:relative;
+  padding:9px 2px;border-radius:var(--radius-sm);color:var(--text-sub);
+  transition:.14s;position:relative;
 }
 .nav-item .nav-ico{font-size:20px;line-height:1;}
 .nav-item .nav-txt{font-size:10px;font-weight:500;line-height:1.2;text-align:center;}
-.nav-item.active{color:var(--blue-deep);background:var(--blue-light);}
+.nav-item:active{background:rgba(255,255,255,.5);}
+/* active 项：白底浮起胶囊，在浅蓝侧边栏里像小卡片抬起 */
+.nav-item.active{
+  color:var(--blue-deep);background:#fff;
+  box-shadow:0 3px 10px rgba(91,163,232,.22);
+}
+.nav-item.active .nav-txt{font-weight:700;}
 .nav-item.active::before{
-  content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);
-  width:3px;height:22px;background:var(--blue);border-radius:0 3px 3px 0;
+  content:"";position:absolute;left:-1px;top:50%;transform:translateY(-50%);
+  width:3px;height:24px;background:var(--blue);border-radius:0 3px 3px 0;
 }
 
 /* 主内容 */
@@ -189,11 +207,13 @@ ul,ol{list-style:none;}
   display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh;
 }
 .topbar{
-  flex-shrink:0;padding:16px 18px 10px;background:#fff;
-  border-bottom:1px solid var(--line-soft);
+  flex-shrink:0;padding:14px 18px 10px;
+  background:rgba(234,241,249,.72);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(196,221,242,.5);
   position:sticky;top:0;z-index:10;
 }
-.topbar-title{font-size:19px;font-weight:800;}
+.topbar-title{font-size:19px;font-weight:800;letter-spacing:.3px;}
 .view-container{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:14px 16px 30px;max-width:var(--maxw);width:100%;margin:0 auto;
