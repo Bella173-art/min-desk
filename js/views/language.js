@@ -5,8 +5,9 @@
 App.Views = App.Views || {};
 App.Views.language = (function(){
   var title = '语言学习';
-  var sub = 'en';           // en | ko | notes
+  var sub = 'en';           // en | oral | ko | notes
   var curIdx = 0, flipped = false, bookIdx = 0, bookFlipped = false;
+  var oralExpanded = null;   // 口语训练当前展开的课 "li_lsi"
 
   /* ---------- 内置素材 ---------- */
   var ORAL = [
@@ -111,6 +112,412 @@ App.Views.language = (function(){
     {t:"📞 报价后跟进 4 步节奏", c:"D+3：礼貌提醒（'不知是否收到报价？'）\nD+7：补充方案（'另提供 2 个降本选项'）\nD+14：最后确认（'本周内未回将先放产能给其他客户'）\nD+30：归档（标记为待激活，每月群发新品激活）。"},
     {t:"⚠️ 警惕 5 类询盘陷阱", c:"① 远低于市场价 → 钓鱼/骗样品 ② 拒收样品但要报价 → 套信息 ③ 急于打款/先付样品费 → 新型诈骗 ④ 邮箱是临时域名（gmail/qq）→ 警惕 ⑤ 反复改收货地/规格 → 套价或贸易欺诈。"}
   ];
+
+  /* ---------- 外贸口语训练数据（由易到难 3 级） ---------- */
+  var ORAL_TRADE = [
+    {
+      lv:1, name:'基础篇', color:'green', desc:'外贸日常 · 询盘入门',
+      lessons:[
+        {
+          title:'Day 1 · 自我介绍与公司介绍',
+          sents:[
+            {en:"Hello, this is Lily from ChemTrade International.", zh:"你好，我是ChemTrade国际公司的Lily。", words:[
+              {w:"international",ipa:"/ˌɪntərˈnæʃənəl/",zh:"adj. 国际的"},
+              {w:"trade",ipa:"/treɪd/",zh:"n. 贸易"}]},
+            {en:"We specialize in chemical raw materials.", zh:"我们专业经营化工原料。", words:[
+              {w:"specialize",ipa:"/ˈspɛʃəlaɪz/",zh:"v. 专门从事"},
+              {w:"chemical",ipa:"/ˈkɛmɪkəl/",zh:"adj. 化工的"},
+              {w:"raw materials",ipa:"/rɔː məˈtɪriəlz/",zh:"n. 原料"}]},
+            {en:"Our company has been in this industry for over ten years.", zh:"我们公司在这个行业已有十多年了。", words:[
+              {w:"industry",ipa:"/ˈɪndəstri/",zh:"n. 行业"},
+              {w:"company",ipa:"/ˈkʌmpəni/",zh:"n. 公司"}]},
+            {en:"Could I send you our latest product catalog?", zh:"我可以给您发一份最新产品目录吗？", words:[
+              {w:"catalog",ipa:"/ˈkætəlɔɡ/",zh:"n. 目录"},
+              {w:"latest",ipa:"/ˈleɪtɪst/",zh:"adj. 最新的"}]},
+            {en:"Let me introduce our main products to you.", zh:"让我向您介绍我们的主要产品。", words:[
+              {w:"introduce",ipa:"/ˌɪntrəˈduːs/",zh:"v. 介绍"},
+              {w:"main",ipa:"/meɪn/",zh:"adj. 主要的"}]}
+          ]
+        },
+        {
+          title:'Day 2 · 产品咨询',
+          sents:[
+            {en:"What products are you interested in?", zh:"您对哪些产品感兴趣？", words:[
+              {w:"interested",ipa:"/ˈɪntərəstɪd/",zh:"adj. 感兴趣的"}]},
+            {en:"We mainly supply titanium dioxide and caustic soda.", zh:"我们主要供应钛白粉和氢氧化钠。", words:[
+              {w:"mainly",ipa:"/ˈmeɪnli/",zh:"adv. 主要地"},
+              {w:"supply",ipa:"/səˈplaɪ/",zh:"v. 供应"},
+              {w:"titanium dioxide",ipa:"/taɪˈteɪniəm daɪˈɑːksaɪd/",zh:"n. 钛白粉"},
+              {w:"caustic soda",ipa:"/ˈkɔːstɪk ˈsoʊdə/",zh:"n. 氢氧化钠"}]},
+            {en:"What specifications do you require?", zh:"您需要什么规格？", words:[
+              {w:"specifications",ipa:"/ˌspɛsɪfɪˈkeɪʃənz/",zh:"n. 规格"},
+              {w:"require",ipa:"/rɪˈkwaɪər/",zh:"v. 需要"}]},
+            {en:"Do you need industrial grade or food grade?", zh:"您需要工业级还是食品级？", words:[
+              {w:"industrial",ipa:"/ɪnˈdʌstriəl/",zh:"adj. 工业的"},
+              {w:"grade",ipa:"/ɡreɪd/",zh:"n. 等级"}]}
+          ]
+        },
+        {
+          title:'Day 3 · 询盘与报价回复',
+          sents:[
+            {en:"Thank you for your inquiry about our products.", zh:"感谢您对我们产品的询价。", words:[
+              {w:"inquiry",ipa:"/ˈɪŋkwəri/",zh:"n. 询价"}]},
+            {en:"We can offer you a very competitive price.", zh:"我们可以给您提供非常有竞争力的价格。", words:[
+              {w:"competitive",ipa:"/kəmˈpɛtɪtɪv/",zh:"adj. 有竞争力的"},
+              {w:"offer",ipa:"/ˈɔːfər/",zh:"v. 报价"}]},
+            {en:"This quotation is valid for fifteen days.", zh:"此报价有效期为15天。", words:[
+              {w:"quotation",ipa:"/kwoʊˈteɪʃən/",zh:"n. 报价单"},
+              {w:"valid",ipa:"/ˈvælɪd/",zh:"adj. 有效的"}]},
+            {en:"Shall I send you the quotation sheet by email?", zh:"我用邮件把报价单发给您好吗？", words:[
+              {w:"quotation sheet",ipa:"/kwoʊˈteɪʃən ʃiːt/",zh:"n. 报价单"}]}
+          ]
+        }
+      ]
+    },
+    {
+      lv:2, name:'进阶篇', color:'blue', desc:'报价谈判 · 订单确认',
+      lessons:[
+        {
+          title:'Day 4 · 报价说明',
+          sents:[
+            {en:"Here is our detailed quotation for your reference.", zh:"这是我们的详细报价单供您参考。", words:[
+              {w:"detailed",ipa:"/ˈdiːteɪld/",zh:"adj. 详细的"},
+              {w:"reference",ipa:"/ˈrɛfərəns/",zh:"n. 参考"}]},
+            {en:"The unit price is one thousand two hundred dollars per metric ton.", zh:"单价为每公吨1200美元。", words:[
+              {w:"unit price",ipa:"/ˈjuːnɪt praɪs/",zh:"n. 单价"},
+              {w:"metric ton",ipa:"/ˈmɛtrɪk tʌn/",zh:"n. 公吨"}]},
+            {en:"This price includes packaging but excludes freight.", zh:"此价格含包装但不含运费。", words:[
+              {w:"packaging",ipa:"/ˈpækɪdʒɪŋ/",zh:"n. 包装"},
+              {w:"freight",ipa:"/freɪt/",zh:"n. 运费"},
+              {w:"excludes",ipa:"/ɪkˈskluːdz/",zh:"v. 不含"}]},
+            {en:"Payment terms are thirty percent deposit by T/T in advance.", zh:"付款方式为预付30%电汇定金。", words:[
+              {w:"payment terms",ipa:"/ˈpeɪmənt tɜːrmz/",zh:"n. 付款条件"},
+              {w:"deposit",ipa:"/dɪˈpɑːzɪt/",zh:"n. 定金"},
+              {w:"in advance",ipa:"/ɪn ədˈvæns/",zh:"adv. 预先"}]}
+          ]
+        },
+        {
+          title:'Day 5 · 价格谈判',
+          sents:[
+            {en:"Your price seems a bit higher than the market average.", zh:"你们的价格似乎比市场均价略高。", words:[
+              {w:"average",ipa:"/ˈævərɪdʒ/",zh:"n. 均价"},
+              {w:"seem",ipa:"/siːm/",zh:"v. 似乎"}]},
+            {en:"We could offer a five percent discount for larger quantities.", zh:"如果数量大我们可以给5%折扣。", words:[
+              {w:"discount",ipa:"/ˈdɪskaʊnt/",zh:"n. 折扣"},
+              {w:"quantity",ipa:"/ˈkwɑːntəti/",zh:"n. 数量"}]},
+            {en:"Let's meet each other halfway on the price.", zh:"价格上我们各让一步吧。", words:[
+              {w:"halfway",ipa:"/ˌhæfˈweɪ/",zh:"adv. 各让一半"}]},
+            {en:"This is our best price and we cannot go any lower.", zh:"这是我们的最优价格，不能再降了。", words:[
+              {w:"best price",ipa:"/bɛst praɪs/",zh:"n. 最优价"}]}
+          ]
+        },
+        {
+          title:'Day 6 · 订单与发货',
+          sents:[
+            {en:"We would like to place a trial order of five tons.", zh:"我们想先下一个5吨的试单。", words:[
+              {w:"trial order",ipa:"/ˈtraɪəl ˈɔːrdər/",zh:"n. 试单"}]},
+            {en:"When can you arrange the shipment?", zh:"你们什么时候能安排发货？", words:[
+              {w:"arrange",ipa:"/əˈreɪndʒ/",zh:"v. 安排"},
+              {w:"shipment",ipa:"/ˈʃɪpmənt/",zh:"n. 发货"}]},
+            {en:"Delivery will be made within twenty days after payment.", zh:"付款后20天内交货。", words:[
+              {w:"delivery",ipa:"/dɪˈlɪvəri/",zh:"n. 交货"},
+              {w:"within",ipa:"/wɪˈðɪn/",zh:"prep. 在…之内"}]},
+            {en:"We will send you the tracking number once shipped.", zh:"发货后我们会把运单号发给您。", words:[
+              {w:"tracking number",ipa:"/ˈtrækɪŋ ˈnʌmbər/",zh:"n. 运单号"}]}
+          ]
+        }
+      ]
+    },
+    {
+      lv:3, name:'高级篇', color:'orange', desc:'合同签约 · 售后处理',
+      lessons:[
+        {
+          title:'Day 7 · 合同条款',
+          sents:[
+            {en:"Let's go through the contract terms one by one.", zh:"我们逐条过一下合同条款吧。", words:[
+              {w:"contract terms",ipa:"/ˈkɑːntrækt tɜːrmz/",zh:"n. 合同条款"},
+              {w:"one by one",ipa:"/wʌn baɪ wʌn/",zh:"逐条地"}]},
+            {en:"The warranty period is twelve months from delivery.", zh:"质保期为交货后12个月。", words:[
+              {w:"warranty period",ipa:"/ˈwɔːrənti ˈpɪriəd/",zh:"n. 质保期"}]},
+            {en:"Force majeure circumstances are stated in clause eight.", zh:"不可抗力情况在第8条中说明。", words:[
+              {w:"force majeure",ipa:"/fɔːrs mæˈʒɜːr/",zh:"n. 不可抗力"},
+              {w:"clause",ipa:"/klɔːz/",zh:"n. 条款"}]},
+            {en:"Both parties should sign and stamp the contract.", zh:"双方应签字盖章确认合同。", words:[
+              {w:"parties",ipa:"/ˈpɑːrtiz/",zh:"n. 双方"},
+              {w:"stamp",ipa:"/stæmp/",zh:"v. 盖章"}]}
+          ]
+        },
+        {
+          title:'Day 8 · 品质异议与售后',
+          sents:[
+            {en:"We received the cargo but found some quality issues.", zh:"我们收到了货但发现一些质量问题。", words:[
+              {w:"cargo",ipa:"/ˈkɑːrɡoʊ/",zh:"n. 货物"},
+              {w:"quality issues",ipa:"/ˈkwɑːləti ˈɪʃuz/",zh:"n. 质量问题"}]},
+            {en:"Please send us photos and a detailed report.", zh:"请把照片和详细报告发给我们。", words:[
+              {w:"detailed report",ipa:"/ˈdiːteɪld rɪˈpɔːrt/",zh:"n. 详细报告"}]},
+            {en:"We will investigate and give you a solution within three days.", zh:"我们会调查并在3天内给您解决方案。", words:[
+              {w:"investigate",ipa:"/ɪnˈvɛstɪɡeɪt/",zh:"v. 调查"},
+              {w:"solution",ipa:"/səˈluːʃən/",zh:"n. 解决方案"}]},
+            {en:"We apologize for the inconvenience caused.", zh:"对给您造成的不便我们深表歉意。", words:[
+              {w:"apologize",ipa:"/əˈpɑːlədʒaɪz/",zh:"v. 道歉"},
+              {w:"inconvenience",ipa:"/ˌɪnkənˈviːniəns/",zh:"n. 不便"}]}
+          ]
+        }
+      ]
+    }
+  ];
+
+  /* ---------- 口语训练：进度 / 语音 / 打分 ---------- */
+  function oralProgress(){ return App.Storage.get('oral_progress', {}); }
+  function oralSetScore(sKey, score){
+    var p = oralProgress();
+    if(!p[sKey] || score > p[sKey]) p[sKey] = score;
+    App.Storage.set('oral_progress', p);
+  }
+  function oralLessonStat(li, lsi){
+    var p = oralProgress(), lesson = ORAL_TRADE[li].lessons[lsi], done = 0;
+    lesson.sents.forEach(function(s, si){
+      if(p[li+'_'+lsi+'_'+si] && p[li+'_'+lsi+'_'+si] >= 60) done++;
+    });
+    return { done: done, total: lesson.sents.length };
+  }
+  function oralTotalStat(){
+    var p = oralProgress(), total = 0, done = 0;
+    ORAL_TRADE.forEach(function(lv, li){
+      lv.lessons.forEach(function(ls, lsi){
+        ls.sents.forEach(function(s, si){
+          total++;
+          if(p[li+'_'+lsi+'_'+si] && p[li+'_'+lsi+'_'+si] >= 60) done++;
+        });
+      });
+    });
+    return { done: done, total: total };
+  }
+  function oralNextSentence(){
+    var p = oralProgress();
+    for(var li=0; li<ORAL_TRADE.length; li++){
+      for(var lsi=0; lsi<ORAL_TRADE[li].lessons.length; lsi++){
+        for(var si=0; si<ORAL_TRADE[li].lessons[lsi].sents.length; si++){
+          var k = li+'_'+lsi+'_'+si;
+          if(!p[k] || p[k] < 60) return { li:li, lsi:lsi, si:si };
+        }
+      }
+    }
+    return null;
+  }
+  /* TTS 原音播放 */
+  function speakText(text, btn){
+    if(!window.speechSynthesis){
+      App.toast('浏览器不支持语音播放'); return;
+    }
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'en-US';
+    u.rate = 0.8;
+    u.pitch = 1;
+    if(btn){
+      var orig = btn.textContent;
+      btn.textContent = '⏸️ 播放中…';
+      btn.disabled = true;
+      u.onend = function(){ btn.textContent = orig; btn.disabled = false; };
+      u.onerror = function(){ btn.textContent = orig; btn.disabled = false; };
+    }
+    speechSynthesis.speak(u);
+  }
+  /* 语音识别 + 打分 */
+  function startRec(sentence, btn, sKey){
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){
+      App.toast('浏览器不支持语音识别，请用 Chrome 或 Edge'); return;
+    }
+    var rec = new SR();
+    rec.lang = 'en-US';
+    rec.continuous = false;
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    var orig = btn.textContent;
+    btn.textContent = '🔴 录音中…';
+    btn.disabled = true;
+    var resultEl = document.getElementById('oralResult_' + sKey);
+    if(resultEl) resultEl.innerHTML = '<div style="padding:8px 10px;background:var(--blue-light);border-radius:8px;font-size:13px;color:var(--blue-deep)">🎤 正在听… 请大声朗读</div>';
+    rec.onresult = function(e){
+      var transcript = e.results[0][0].transcript;
+      var result = scorePron(sentence.en, transcript);
+      oralSetScore(sKey, result.score);
+      if(resultEl) resultEl.innerHTML = renderScoreResult(result, transcript);
+      btn.textContent = orig; btn.disabled = false;
+      App.toast('得分 ' + result.score + ' 分');
+    };
+    rec.onerror = function(e){
+      var msg = e.error === 'no-speech' ? '未检测到语音，请大声朗读' :
+                e.error === 'not-allowed' ? '请允许麦克风权限' :
+                e.error === 'network' ? '网络错误，请重试' : ('识别失败：' + e.error);
+      if(resultEl) resultEl.innerHTML = '<div style="padding:8px 10px;background:var(--red-bg);border-radius:8px;font-size:13px;color:var(--red)">⚠️ ' + msg + '</div>';
+      btn.textContent = orig; btn.disabled = false;
+    };
+    rec.onend = function(){
+      btn.textContent = orig; btn.disabled = false;
+    };
+    try { rec.start(); } catch(err){
+      App.toast('启动录音失败，请重试');
+      btn.textContent = orig; btn.disabled = false;
+    }
+  }
+  /* 单词级模糊匹配 + Levenshtein 距离 */
+  function levDist(a, b){
+    if(a.length === 0) return b.length;
+    if(b.length === 0) return a.length;
+    var m = [];
+    for(var i=0; i<=b.length; i++) m[i] = [i];
+    for(var j=0; j<=a.length; j++) m[0][j] = j;
+    for(var i=1; i<=b.length; i++){
+      for(var j=1; j<=a.length; j++){
+        m[i][j] = b.charAt(i-1) === a.charAt(j-1) ? m[i-1][j-1] :
+          Math.min(m[i-1][j-1]+1, m[i][j-1]+1, m[i-1][j]+1);
+      }
+    }
+    return m[b.length][a.length];
+  }
+  function scorePron(target, recognized){
+    var clean = function(s){ return s.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/).filter(Boolean); };
+    var tWords = clean(target);
+    var rWords = clean(recognized);
+    var matched = 0, missed = [];
+    tWords.forEach(function(w){
+      var hit = rWords.indexOf(w) !== -1;
+      if(!hit && w.length > 3){
+        hit = rWords.some(function(rw){
+          return rw.length > 3 && (rw.indexOf(w) !== -1 || w.indexOf(rw) !== -1 || levDist(w, rw) <= 2);
+        });
+      }
+      if(hit) matched++; else missed.push(w);
+    });
+    var score = tWords.length ? Math.round(matched / tWords.length * 100) : 0;
+    return { score: score, matched: matched, total: tWords.length, missed: missed, recognized: recognized };
+  }
+  function renderScoreResult(result, transcript){
+    var bg = result.score >= 80 ? 'var(--green-bg)' : (result.score >= 60 ? 'var(--orange-bg)' : 'var(--red-bg)');
+    var cl = result.score >= 80 ? 'var(--green)' : (result.score >= 60 ? 'var(--orange)' : 'var(--red)');
+    var emoji = result.score >= 80 ? '👍' : (result.score >= 60 ? '🙂' : '💪');
+    var msg = result.score >= 80 ? '优秀！发音很标准' : (result.score >= 60 ? '还不错，注意标红单词' : '继续练习，重点关注红色单词');
+    var h = '<div style="padding:10px;background:' + bg + ';border-radius:8px;font-size:13px">';
+    h += '<div style="font-weight:800;font-size:16px;color:' + cl + '">' + emoji + ' 得分：' + result.score + ' / 100</div>';
+    h += '<div class="muted sm" style="margin-top:2px">' + msg + '</div>';
+    if(result.missed.length){
+      h += '<div style="margin-top:6px"><span class="muted xs">⚠️ 漏读/读错：</span> ';
+      h += result.missed.map(function(w){ return '<span style="color:var(--red);font-weight:700;background:var(--red-bg);padding:1px 6px;border-radius:4px">' + w + '</span>'; }).join(' ');
+      h += '</div>';
+    }
+    if(result.matched > 0 && result.missed.length > 0){
+      h += '<div class="muted xs" style="margin-top:4px">✅ 正确读出 ' + result.matched + '/' + result.total + ' 个词</div>';
+    }
+    if(transcript){
+      h += '<div class="muted xs" style="margin-top:4px;font-style:italic">你说的是："' + App.Util.escape(transcript) + '"</div>';
+    }
+    h += '</div>';
+    return h;
+  }
+  /* ---------- 外贸口语训练子页 ---------- */
+  function renderOral(){
+    var p = oralProgress();
+    var overall = oralTotalStat();
+    var nextS = oralNextSentence();
+    var h = '';
+    /* 总览 */
+    h += '<div class="card"><div class="card-title"><span class="ico">🎯</span>外贸口语训练计划</div>';
+    h += '<div class="muted sm" style="margin-bottom:10px">由易到难 3 个级别 · 共 ' + overall.total + ' 句实战对话</div>';
+    h += '<div class="stat-grid">' +
+      '<div class="stat-card"><div class="label">已练习</div><div class="value green">' + overall.done + '</div></div>' +
+      '<div class="stat-card"><div class="label">总句子</div><div class="value">' + overall.total + '</div></div>' +
+      '<div class="stat-card"><div class="label">完成率</div><div class="value" style="color:var(--blue)">' + (overall.total ? Math.round(overall.done/overall.total*100) : 0) + '%</div></div>' +
+    '</div>';
+    /* 今日推荐 */
+    if(nextS){
+      var ns = ORAL_TRADE[nextS.li].lessons[nextS.lsi].sents[nextS.si];
+      h += '<div class="oral-today" data-oral-jump="' + nextS.li + '_' + nextS.lsi + '">' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">' +
+        '<span style="font-size:16px">📍</span>' +
+        '<span style="font-weight:700;font-size:14px">今日推荐练习</span></div>' +
+        '<div class="sm" style="line-height:1.5">' + ns.en + '</div>' +
+        '<div class="muted xs" style="margin-top:2px">' + ns.zh + '</div>' +
+        '<div class="muted xs" style="margin-top:4px">来自：' + ORAL_TRADE[nextS.li].name + ' · ' + ORAL_TRADE[nextS.li].lessons[nextS.lsi].title + '</div>' +
+      '</div>';
+    } else {
+      h += '<div class="oral-today" style="text-align:center"><span style="font-size:24px">🎉</span><div class="bold sm" style="margin-top:4px">全部句子已练习完毕！</div></div>';
+    }
+    /* 浏览器支持提示 */
+    var hasSR = ('SpeechRecognition' in window) || ('webkitSpeechRecognition' in window);
+    var hasTTS = !!window.speechSynthesis;
+    if(!hasSR || !hasTTS){
+      h += '<div style="padding:8px 12px;background:var(--orange-bg);border-radius:8px;margin-top:10px;font-size:12px;color:var(--orange)">' +
+        '⚠️ ' + (!hasSR ? '语音识别' : '') + (!hasSR && !hasTTS ? '和' : '') + (!hasTTS ? '原音播放' : '') +
+        '需要 Chrome 或 Edge 浏览器。其他浏览器可查看句子和生词，但打分功能不可用。</div>';
+    }
+    h += '</div>';
+    /* 各级别 */
+    ORAL_TRADE.forEach(function(lv, li){
+      var cVar = lv.color === 'green' ? 'var(--green)' : (lv.color === 'orange' ? 'var(--orange)' : 'var(--blue)');
+      var cBg = lv.color === 'green' ? 'var(--green-bg)' : (lv.color === 'orange' ? 'var(--orange-bg)' : 'var(--blue-light)');
+      h += '<div class="card"><div class="card-title"><span class="ico">📖</span>' + lv.name + '</div>';
+      h += '<div class="muted sm" style="margin-bottom:12px">' + lv.desc + '</div>';
+      lv.lessons.forEach(function(ls, lsi){
+        var r = oralLessonStat(li, lsi);
+        var pct = r.total ? Math.round(r.done / r.total * 100) : 0;
+        var expanded = (oralExpanded === li + '_' + lsi);
+        var doneIcon = pct === 100 ? '✅' : (pct > 0 ? '🔄' : '▶️');
+        h += '<div style="margin-bottom:8px">';
+        h += '<div class="oral-lesson' + (expanded ? ' expanded' : '') + '" data-oral-toggle="' + li + '_' + lsi + '">';
+        h += '<span style="font-size:15px">' + doneIcon + '</span>';
+        h += '<div style="flex:1"><div class="bold sm">' + ls.title + '</div>';
+        h += '<div class="muted xs">' + r.done + '/' + r.total + ' 句已达标</div></div>';
+        h += '<span class="oral-pct" style="color:' + cVar + '">' + pct + '%</span>';
+        h += '<span class="oral-arrow">' + (expanded ? '▼' : '▶') + '</span>';
+        h += '</div>';
+        h += '<div class="oral-bar"><div class="oral-bar-fill" style="width:' + pct + '%;background:' + cVar + '"></div></div>';
+        if(expanded){
+          h += '<div class="oral-sents">';
+          ls.sents.forEach(function(s, si){
+            var sKey = li + '_' + lsi + '_' + si;
+            var score = p[sKey];
+            h += renderOralSent(s, sKey, score, cBg);
+          });
+          h += '</div>';
+        }
+        h += '</div>';
+      });
+      h += '</div>';
+    });
+    return h;
+  }
+  function renderOralSent(s, sKey, score, cBg){
+    var h = '<div class="oral-sent" id="oral_' + sKey + '">';
+    h += '<div class="oral-sent-en">' + s.en + '</div>';
+    h += '<div class="oral-sent-zh">' + s.zh + '</div>';
+    /* 生词 */
+    if(s.words && s.words.length){
+      h += '<div class="oral-words">';
+      h += '<div class="muted xs" style="margin-bottom:4px">📚 生词</div>';
+      s.words.forEach(function(w){
+        h += '<span class="oral-word"><b style="color:var(--blue-deep)">' + w.w + '</b> <span class="oral-ipa">' + w.ipa + '</span> <span style="color:var(--text-sub)">' + w.zh + '</span></span>';
+      });
+      h += '</div>';
+    }
+    /* 按钮 */
+    h += '<div class="oral-btns">';
+    h += '<button class="btn btn-outline btn-sm oral-btn-play" data-play="' + sKey + '">🔊 原音</button>';
+    h += '<button class="btn btn-primary btn-sm oral-btn-rec" data-rec="' + sKey + '">🎤 跟读打分</button>';
+    h += '</div>';
+    /* 得分结果 */
+    h += '<div id="oralResult_' + sKey + '" class="oral-result">';
+    if(score !== undefined && score !== null){
+      h += '<div style="padding:6px 10px;background:' + cBg + ';border-radius:8px;font-size:12px">' +
+        '<span style="font-weight:700">上次得分：' + score + '/100</span> ' +
+        (score >= 80 ? '👍' : (score >= 60 ? '🙂' : '💪')) + '</div>';
+    }
+    h += '</div>';
+    h += '</div>';
+    return h;
+  }
 
   /* ---------- 数据 ---------- */
   function words(){ return App.Storage.getList('words'); }
@@ -397,10 +804,11 @@ App.Views.language = (function(){
 
   /* ---------- 主 render ---------- */
   function render(){
-    var content = sub==='en' ? renderEn() : (sub==='ko' ? renderKo() : renderNotes());
+    var content = sub==='en' ? renderEn() : (sub==='oral' ? renderOral() : (sub==='ko' ? renderKo() : renderNotes()));
     return ''+
     '<div class="tabs">'+
       '<div class="tab '+(sub==='en'?'active':'')+'" data-sub="en">🇬🇧 英语</div>'+
+      '<div class="tab '+(sub==='oral'?'active':'')+'" data-sub="oral">🗣️ 口语</div>'+
       '<div class="tab '+(sub==='ko'?'active':'')+'" data-sub="ko">🇰🇷 韩语</div>'+
       '<div class="tab '+(sub==='notes'?'active':'')+'" data-sub="notes">🗒️ 笔记</div>'+
     '</div>'+content;
@@ -560,6 +968,41 @@ App.Views.language = (function(){
       el.addEventListener('click',function(){
         var p=el.dataset.notedel.split(':'), key=p[0], id=p[1];
         App.Storage.removeById(key,id); refresh();
+      });
+    });
+    // === 口语训练 ===
+    // 今日推荐跳转
+    App.Util.qsa('[data-oral-jump]',root).forEach(function(el){
+      el.addEventListener('click',function(){
+        oralExpanded = el.dataset.oralJump;
+        refresh();
+        setTimeout(function(){
+          var t = document.querySelector('[data-oral-toggle="'+oralExpanded+'"]');
+          if(t) t.scrollIntoView({behavior:'smooth',block:'center'});
+        },100);
+      });
+    });
+    // 课程展开/折叠
+    App.Util.qsa('[data-oral-toggle]',root).forEach(function(el){
+      el.addEventListener('click',function(){
+        oralExpanded = (oralExpanded === el.dataset.oralToggle) ? null : el.dataset.oralToggle;
+        refresh();
+      });
+    });
+    // 原音播放
+    App.Util.qsa('[data-play]',root).forEach(function(el){
+      el.addEventListener('click',function(){
+        var parts = el.dataset.play.split('_');
+        var s = ORAL_TRADE[+parts[0]].lessons[+parts[1]].sents[+parts[2]];
+        speakText(s.en, el);
+      });
+    });
+    // 跟读打分
+    App.Util.qsa('[data-rec]',root).forEach(function(el){
+      el.addEventListener('click',function(){
+        var parts = el.dataset.rec.split('_');
+        var s = ORAL_TRADE[+parts[0]].lessons[+parts[1]].sents[+parts[2]];
+        startRec(s, el, parts.join('_'));
       });
     });
   }
