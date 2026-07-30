@@ -104,21 +104,25 @@
       return {t:'肥胖',c:'red'};
     },
 
-    // 由生日算 X岁X天
+    // 由生日算 X个月X天（按真实日历逐月减，1个月按当月实际天数算）
     ageDetail: function(birthStr){
       if(!birthStr) return null;
       var b = new Date(birthStr);
       if(isNaN(b.getTime())) return null;
       var now = new Date();
-      var years = now.getFullYear()-b.getFullYear();
-      var m = now.getMonth()-b.getMonth();
-      if(m<0 || (m===0 && now.getDate()<b.getDate())) years--;
+      if(now<b) return {months:0, days:0, daysToBirthday:0, totalDays:0};
       // 总天数
-      var days = Math.floor((now-b)/(86400000));
+      var totalDays = Math.floor((now-b)/(86400000));
+      // 按真实日历逐月减，算出满月数和剩余天数
+      var months = (now.getFullYear()-b.getFullYear())*12 + (now.getMonth()-b.getMonth());
+      var anchor = new Date(b.getFullYear(), b.getMonth()+months, b.getDate());
+      if(anchor>now){ months--; anchor = new Date(b.getFullYear(), b.getMonth()+months, b.getDate()); }
+      var days = Math.floor((now-anchor)/(86400000));
+      // 距下次生日
       var nextB = new Date(now.getFullYear(), b.getMonth(), b.getDate());
       if(nextB < now) nextB.setFullYear(now.getFullYear()+1);
       var daysToNext = Math.ceil((nextB-now)/86400000);
-      return {years:Math.max(0,years), days:days, daysToBirthday:daysToNext, totalDays:days};
+      return {months:Math.max(0,months), days:Math.max(0,days), totalDays:totalDays, daysToBirthday:daysToNext};
     },
 
     qs: function(sel, root){ return (root||document).querySelector(sel); },
